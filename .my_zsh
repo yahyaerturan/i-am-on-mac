@@ -67,4 +67,5 @@ export LSCOLORS=GxBxCxDxexegedabagaced
 ### PATHS ###
 
 export PATH="$HOME/Code/flutter/bin:$PATH"
+export PATH="/opt/homebrew/bin:$PATH"
 
