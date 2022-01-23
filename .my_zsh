@@ -25,7 +25,8 @@ setopt HIST_REDUCE_BLANKS
 ### GENERIC OPTIONS ###
 
 setopt CASE_GLOB
-setopt AUTO_CD
+# setopt AUTO_CD
+unsetopt AUTO_CD
 setopt GLOB_COMPLETE
 setopt CORRECT
 setopt CORRECT_ALL
@@ -44,7 +45,7 @@ zstyle ':completion:*' list-suffixes zstyle ':completion:*' expand prefix suffix
 
 ### COMMAND PROMPT ###
 
-PROMPT='%(?.%F{green}🎻.%F{red}💢%?)%f %B%F{240}%1~%f%b %# '
+PROMPT='%(?.%F{green}🎻.%F{red}💢%?)%f %B%F{240}%1~%f%b \$ '
 RPROMPT='%*'
 
 autoload -Uz vcs_info
@@ -66,6 +67,16 @@ export LSCOLORS=GxBxCxDxexegedabagaced
 
 ### PATHS ###
 
+export PATH="$HOME/Code/misc/i-am-on-mac/bin:$PATH"
 export PATH="$HOME/Code/flutter/bin:$PATH"
 export PATH="/opt/homebrew/bin:$PATH"
+
+
+
+### ALIASES
+
+alias docker-start="docker-compose --file .docker/docker-compose.yml up -d && docker-ssh"
+alias docker-stop="docker-compose --file .docker/docker-compose.yml down"
+alias docker-clean="docker volume prune;docker network prune;docker container prune"
+
 

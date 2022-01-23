@@ -11,3 +11,9 @@ Open your `~/.zshrc` file and add this line:
 ```bash
 sudo ln -s /Applications/Sublime\ Text.app/Contents/SharedSupport/bin/subl /usr/local/bin/sublime
 ```
+
+## Docker SSH
+
+```
+chmod a+x bin/docker-ssh
+```
