@@ -45,7 +45,7 @@ zstyle ':completion:*' list-suffixes zstyle ':completion:*' expand prefix suffix
 
 ### COMMAND PROMPT ###
 
-PROMPT='%(?.%F{green}🎻.%F{red}💢%?)%f %B%F{240}%1~%f%b \$ '
+PROMPT='%(?.%F{green}➜ .%F{red}➜ ℯ %?)%f %B%F{240}%1~%f%b \$ '
 RPROMPT='%*'
 
 autoload -Uz vcs_info
@@ -61,7 +61,33 @@ zstyle ':vcs_info:*' enable git
 ### OUTPUT ###
 
 export CLICOLOR=1
-export LSCOLORS=GxBxCxDxexegedabagaced
+
+
+# This string is a concatenation of pairs of the
+# format fb, where f is the foreground color and b is the background color.
+# a black			A bold black, usually shows up as dark grey
+# b red 			B bold red
+# c green			C bold green
+# d brown			D bold brown, usually shows up as yellow
+# e blue			E bold blue
+# f magenta			F bold magenta
+# g cyan			G bold cyan
+# h light grey		H bold light grey; looks like bright white
+# x default foreground or background
+#
+# Order of color pairs (fb)
+# 1. directory
+# 2. symbolic link
+# 3. socket
+# 4. pipe
+# 5. executable
+# 6. block special
+# 7. character special
+# 8. executable with setuid bit set
+# 9. executable with setgid bit set
+# 10. directory writable to others, with sticky bit
+# 11. directory writable to others, without sticky bit
+export LSCOLORS=GxFxcxdxDxegedabagacad
 
 
 
