@@ -45,7 +45,7 @@ zstyle ':completion:*' list-suffixes zstyle ':completion:*' expand prefix suffix
 
 ### COMMAND PROMPT ###
 
-PROMPT='%(?.%F{green}➜ .%F{red}➜ ℯ %?)%f %B%F{240}%1~%f%b \$ '
+PROMPT='%(?.%F{green}➜ .%F{red}➜ ℯ %?)%f %B%F{008}%1~%f%b %B%F{007}\$%f%b '
 RPROMPT='%*'
 
 autoload -Uz vcs_info
@@ -59,9 +59,6 @@ zstyle ':vcs_info:*' enable git
 
 
 ### OUTPUT ###
-
-export CLICOLOR=1
-
 
 # This string is a concatenation of pairs of the
 # format fb, where f is the foreground color and b is the background color.
@@ -87,6 +84,8 @@ export CLICOLOR=1
 # 9. executable with setgid bit set
 # 10. directory writable to others, with sticky bit
 # 11. directory writable to others, without sticky bit
+
+export CLICOLOR=1
 export LSCOLORS=GxFxcxdxDxegedabagacad
 
 
