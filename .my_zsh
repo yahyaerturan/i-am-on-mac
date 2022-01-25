@@ -103,6 +103,8 @@ export PATH="/opt/homebrew/bin:$PATH"
 alias ls="gls -x --color  --indicator-style=slash --group-directories-first --almost-all --classify --human-readable"
 alias ll="gls -l --color --indicator-style=slash --group-directories-first --almost-all --classify --human-readable"
 
+
+
 ### ALIASES
 
 alias docker-start="docker-compose --file .docker/docker-compose.yml up -d && docker-ssh"
