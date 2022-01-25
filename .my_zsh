@@ -100,7 +100,7 @@ export PATH="/opt/homebrew/bin:$PATH"
 
 ### COREUTILS
 
-alias ls="gls -x --color  --indicator-style=slash --group-directories-first --almost-all --classify --human-readable"
+alias ls="gls --color  --indicator-style=slash --group-directories-first --almost-all --classify --human-readable"
 alias ll="gls -l --color --indicator-style=slash --group-directories-first --almost-all --classify --human-readable"
 
 
@@ -110,5 +110,3 @@ alias ll="gls -l --color --indicator-style=slash --group-directories-first --alm
 alias docker-start="docker-compose --file .docker/docker-compose.yml up -d && docker-ssh"
 alias docker-stop="docker-compose --file .docker/docker-compose.yml down"
 alias docker-clean="docker volume prune;docker network prune;docker container prune"
-
-
