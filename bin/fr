@@ -1,0 +1,48 @@
+#!/bin/bash
+
+CURRENTDATE=`date +"%Y-%m-%d %T"`
+CURRENTDATEONLY=`date +"%b %d, %Y"`
+CURRENTEPOCTIME=`date +"%Y-%m-%d %T"`
+MYPREFDATEDISP=`date +"%b %d, %Y %T"`
+ 
+echo QUERIED AT: ${MYPREFDATEDISP}
+
+# Fetch the HTML content using curl and store it in temporary files
+curl -s "https://www.fxempire.com/currencies/usd-try/forward-rates" > temp_usd.html
+curl -s "https://www.fxempire.com/currencies/eur-try/forward-rates" > temp_eur.html
+
+# Extract the table data using pup and format the output for both USD and EUR
+output_usd=$(cat temp_usd.html | pup 'table' | pup 'tr json{}' | jq -r '.[]? | [.children[0].children[0].text, .children[3].text] | @tsv')
+output_eur=$(cat temp_eur.html | pup 'table' | pup 'tr json{}' | jq -r '.[]? | .children[3].text')
+
+# Print the table header
+printf "|----------------------|-------------|-------------|\n"
+printf "| %-20s | %11s | %11s |\n" "Expiration" "USD Forward" "EUR Forward"
+printf "|----------------------|-------------|-------------|\n"
+
+# Print the combined table content
+count=0
+while IFS=$'\t' read -r col1 col2; do
+    if [ $count -eq 0 ]; then
+        count=$((count+1))
+        continue
+    fi
+    col3=$(echo "$output_eur" | sed -n "${count}p")
+    if [ -z "$col2" ] || [ "$col2" == "null" ]; then
+        col2="N/A"
+    fi
+    if [ -z "$col3" ] || [ "$col3" == "null" ]; then
+        col3="N/A"
+    fi
+    printf "| %-20s | %11s | %11s |\n" "$col1" "$col2" "$col3"
+    count=$((count+1))
+done <<< "$output_usd"
+
+printf "|----------------------|-------------|-------------|\n\n"
+
+printf "Source:\n"
+printf "https://www.fxempire.com/currencies/usd-try/forward-rates\n"
+printf "https://www.fxempire.com/currencies/eur-try/forward-rates\n"
+# Clean up temporary files
+rm temp_usd.html
+rm temp_eur.html
