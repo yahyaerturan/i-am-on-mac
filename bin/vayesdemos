@@ -1,0 +1,53 @@
+#!/bin/bash
+
+# List of URLs
+urls=(
+    "https://demo.vayes.com.tr"
+    "https://demo2.vayes.com.tr"
+    "https://demo3.vayes.com.tr"
+    "https://demo4.vayes.com.tr"
+    "https://demo5.vayes.com.tr"
+    "https://demo6.vayes.com.tr"
+    "https://demo7.vayes.com.tr"
+    "https://demo8.vayes.com.tr"
+    "https://demo9.vayes.com.tr"
+    "https://demo10.vayes.com.tr"
+    "https://braavos.vayes.com.tr"
+    "https://demo12.vayes.com.tr"
+    "https://demo13.vayes.com.tr"
+    "https://demo14.vayes.com.tr"
+    "https://demostatic.vayes.com.tr"
+)
+
+# Print table header
+printf "| %-15s | %-50s |\n" "Subdomain" "Title"
+printf "|-----------------|----------------------------------------------------|\n"
+
+# Loop through each URL
+for url in "${urls[@]}"; do
+    # Use curl to fetch the HTML content and sed to extract the title
+    title=$(curl -s "$url" | sed -n 's|.*<title>\(.*\)</title>.*|\1|p;q' | tr -cd '[:print:]' | cut -c -44)
+
+    # Remove leading and trailing spaces from the title
+    title=$(echo "$title" | awk '{$1=$1};1')
+
+    subdomain=$(echo "$url" | sed -n 's|https://\([^\.]*\)\..*|\1|p')
+    subdomain=$(echo "$subdomain" | awk '{$1=$1};1')
+
+    # Replace empty titles with a placeholder
+    title=${title:-"---"}
+
+    # Check if the title has any characters other than [a-zA-Z0-9-_.]
+    if [[ $title =~ [şŞüÜöÖçÇıİğĞ] ]]; then
+        padding=$((51 - $(printf "%s" "$title" | wc -c)))
+    else
+        padding=$((50 - $(printf "%s" "$title" | wc -c)))
+    fi
+
+    # Output the URL and its title with padding
+    printf "| %-15s | %-50s |\n" "$subdomain" "$(printf "%s%*s" "$title" $padding "")"
+done
+
+# Print table footer
+printf "|-----------------|----------------------------------------------------|\n"
+
