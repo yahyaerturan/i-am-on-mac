@@ -1,0 +1,7 @@
+{
+  "tasks": [
+    {"title": "Exercise", "duration": 30, "notes": "Morning workout"},
+    {"title": "Tutorial", "duration": 30, "notes": "Learn something new"},
+    {"title": "Read News", "duration": 15, "notes": "Stay informed"}
+  ]
+}

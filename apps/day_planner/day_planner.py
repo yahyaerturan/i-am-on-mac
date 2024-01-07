@@ -51,11 +51,17 @@ def load_tasks():
     else:
         return {"tasks": []}
 
+def load_routine():
+    routine_file = os.path.expanduser("~/.day_planner_routine.json")
+    if os.path.exists(routine_file):
+        with open(routine_file, "r") as file:
+            return json.load(file)
+    else:
+        return {"tasks": []}
 
 def save_tasks(tasks):
     with open(DATA_FILE, "w") as file:
         json.dump(tasks, file, indent=2)
-
 
 def get_date_input(prompt, is_editing=False):
     while True:
@@ -143,7 +149,6 @@ def get_date_input(prompt, is_editing=False):
         except ValueError:
             print_error("Invalid input. Please try again.")
 
-
 def get_duration_input(prompt, is_editing=False):
     while True:
         try:
@@ -215,7 +220,7 @@ def list_tasks(tasks, completed=None, reverse=False):
             notes_line = (task.get("notes", "")[:29] + "...") if len(task.get("notes", "")) > 32 else task.get("notes", "")
             
             # Construct the second line only if notes is not empty
-            title_notes = f"🏆 {title}\n📂 {notes_line}" if notes_line else title
+            title_notes = f"🏆 {title}\n📂 {notes_line}" if notes_line else "🏆 "+title
 
             # Format due date to the desired format
             due_date = datetime.strptime(task["date"], "%Y-%m-%d").strftime("%a, %b %d, %Y")
@@ -350,8 +355,30 @@ def view_task_details(tasks):
     except ValueError:
         print_error("Invalid input. Please enter a valid task number.")
 
+def add_routine_tasks(tasks, routine):
+    date_prompt = "Add routine tasks for today or tomorrow? (today/tomorrow): "
+    chosen_date = get_date_input(date_prompt)
+    if chosen_date is None:
+        print_info("No routine tasks added.")
+        return
 
-# Modify the main function
+    routine_tasks = routine.get("tasks", [])
+
+    for routine_task in routine_tasks:
+        # Assuming routine tasks are added for the chosen date
+        new_task = {
+            "title": routine_task["title"],
+            "date": str(chosen_date),
+            "duration": routine_task.get("duration", 30),
+            "completed": False,
+            "notes": routine_task.get("notes", ""),
+            "completed_at": None,
+        }
+        tasks["tasks"].append(new_task)
+
+    save_tasks(tasks)
+    print_success(f"\nRoutine tasks added successfully.")
+
 def main():
     tasks = load_tasks()
 
@@ -367,7 +394,9 @@ def main():
             print_info("5. List Completed Tasks (Newest to Oldest)")
             print_info("6. Mark Task as Done")
             print_info("7. View Task Details")
-            print_info("8. Quit")
+            print_info("8. Add Daily Routine Tasks")
+            print_info("9. Quit")
+            
 
             choice = input("Enter your choice: ")
 
@@ -386,13 +415,15 @@ def main():
             elif choice == "7":
                 view_task_details(tasks)
             elif choice == "8":
+                routine = load_routine()
+                add_routine_tasks(tasks, routine)
+            elif choice == "9":
                 print_info("Exiting the day planner app.")
                 break
             else:
                 print_error("Invalid choice. Please enter a number between 1 and 8.")
     except KeyboardInterrupt:
         print_info("\nExiting the day planner app.")
-
 
 if __name__ == "__main__":
     main()

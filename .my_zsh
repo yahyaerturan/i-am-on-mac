@@ -112,7 +112,7 @@ alias docker-start="docker-compose --file .docker/docker-compose.yml up -d && do
 alias docker-stop="docker-compose --file .docker/docker-compose.yml down"
 alias docker-clean="docker volume prune;docker network prune;docker container prune"
 alias docker-open="open --background -a Docker"
-alias planner='python3 "$HOME/Code/misc/i-am-on-mac/apps/day_planner.py"'
+alias planner='python3 "$HOME/Code/misc/i-am-on-mac/apps/day_planner/day_planner.py"'
 
 
 ### PHP Version
