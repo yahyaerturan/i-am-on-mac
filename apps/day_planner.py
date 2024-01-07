@@ -3,7 +3,7 @@ import json
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from colorama import Fore, Style, init
-from prettytable import PrettyTable
+from prettytable import PrettyTable, FRAME, ALL
 
 
 # Initialize colorama
@@ -162,7 +162,7 @@ def get_duration_input(prompt, is_editing=False):
                 pass
 
             # Show options
-            print("Duration Input Options:")
+            print_title("Duration Input Options:")
             print("  1. 15 minutes")
             print("  2. 30 minutes")
             print("  3. 45 minutes")
@@ -193,8 +193,6 @@ def get_duration_input(prompt, is_editing=False):
         except ValueError:
             print_error("Invalid input. Please try again.")
 
-
-# Modify the list_tasks function
 def list_tasks(tasks, completed=None, reverse=False):
     sorted_tasks = sorted(
         tasks["tasks"],
@@ -204,20 +202,29 @@ def list_tasks(tasks, completed=None, reverse=False):
 
     table = PrettyTable()
     table.field_names = ["#", "Title", "Due Date", "Duration", "Status"]
+    table.hrules = ALL
+    table.align["Title"] = "l"  # Align the "Title" column to the left
+
 
     for idx, task in enumerate(sorted_tasks):
         if completed is None or task["completed"] == completed:
             status = "Completed" if task["completed"] else "Incomplete"
 
-            # Limit title and notes to 32 characters
-            title = task["title"][:32]
-            notes_line = task.get("notes", "")[:32]
+            # Limit title and notes to 32 characters, append "..." if longer
+            title = (task["title"][:29] + "...") if len(task["title"]) > 32 else task["title"]
+            notes_line = (task.get("notes", "")[:29] + "...") if len(task.get("notes", "")) > 32 else task.get("notes", "")
+            
+            # Construct the second line only if notes is not empty
+            title_notes = f"🏆 {title}\n📂 {notes_line}" if notes_line else title
+
+            # Format due date to the desired format
+            due_date = datetime.strptime(task["date"], "%Y-%m-%d").strftime("%a, %b %d, %Y")
 
             table.add_row(
                 [
                     idx + 1,
-                    f"{title}\n♫ {notes_line}",
-                    task["date"],
+                    title_notes,
+                    due_date,
                     f"{task['duration']} minutes",
                     status,
                 ]
@@ -257,7 +264,7 @@ def add_task(tasks):
 
 
 def edit_task(tasks):
-    list_tasks(tasks)
+    list_tasks(tasks, False, True)
     try:
         task_index = int(input("\nEnter the task number to edit: ")) - 1
         if 0 <= task_index < len(tasks["tasks"]):
@@ -295,7 +302,7 @@ def edit_task(tasks):
 
 
 def remove_task(tasks):
-    list_tasks(tasks)
+    list_tasks(tasks, reverse=True)
     try:
         task_index = int(input("\nEnter the task number to remove: ")) - 1
         if 0 <= task_index < len(tasks["tasks"]):
@@ -310,14 +317,14 @@ def remove_task(tasks):
 
 # Functions (add this function)
 def mark_task_done(tasks):
-    list_tasks(tasks, completed=False)
+    list_tasks(tasks, False, True)
     try:
         task_index = int(input("\nEnter the task number to mark as done: ")) - 1
         if 0 <= task_index < len(tasks["tasks"]):
             tasks["tasks"][task_index]["completed"] = True
             save_tasks(tasks)
             print_success(
-                f"\nTask '{tasks['tasks'][task_index]['description']}' marked as done."
+                f"\nTask '{tasks['tasks'][task_index]['title']}' marked as done."
             )
         else:
             print_error("Invalid task number.")
@@ -327,7 +334,7 @@ def mark_task_done(tasks):
 
 # Add a new function to view task details
 def view_task_details(tasks):
-    list_tasks(tasks)
+    list_tasks(tasks, reverse=True)
     try:
         task_index = int(input("\nEnter the task number to view details: ")) - 1
         if 0 <= task_index < len(tasks["tasks"]):
@@ -348,7 +355,7 @@ def view_task_details(tasks):
 def main():
     tasks = load_tasks()
 
-    list_tasks(tasks)
+    list_tasks(tasks, False, True)
 
     try:
         while True:
@@ -356,7 +363,7 @@ def main():
             print_info("1. Add Task")
             print_info("2. Edit Task")
             print_info("3. Remove Task")
-            print_info("4. List Tasks")
+            print_info("4. List Tasks (Newest to Oldest)")
             print_info("5. List Completed Tasks (Newest to Oldest)")
             print_info("6. Mark Task as Done")
             print_info("7. View Task Details")
