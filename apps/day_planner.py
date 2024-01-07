@@ -233,7 +233,6 @@ def list_tasks(tasks, completed=None, reverse=False):
     print_title("\nTasks:")
     print(table)
 
-
 def add_task(tasks):
     title = input("Task title: ")
 
@@ -257,11 +256,11 @@ def add_task(tasks):
         "duration": duration,
         "completed": False,
         "notes": notes,
+        "completed_at": None,
     }
     tasks["tasks"].append(new_task)
     save_tasks(tasks)
     print_success(f"\nTask added successfully.")
-
 
 def edit_task(tasks):
     list_tasks(tasks, False, True)
@@ -300,7 +299,6 @@ def edit_task(tasks):
     except ValueError:
         print_error("Invalid input. Please enter a valid task number.")
 
-
 def remove_task(tasks):
     list_tasks(tasks, reverse=True)
     try:
@@ -314,25 +312,22 @@ def remove_task(tasks):
     except ValueError:
         print_error("Invalid input. Please enter a valid task number.")
 
-
-# Functions (add this function)
 def mark_task_done(tasks):
     list_tasks(tasks, False, True)
     try:
         task_index = int(input("\nEnter the task number to mark as done: ")) - 1
         if 0 <= task_index < len(tasks["tasks"]):
             tasks["tasks"][task_index]["completed"] = True
+            tasks["tasks"][task_index]["completed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             save_tasks(tasks)
             print_success(
-                f"\nTask '{tasks['tasks'][task_index]['title']}' marked as done."
+                f"\nTask '{tasks['tasks'][task_index]['title']}' marked as done at {tasks['tasks'][task_index]['completed_at']}."
             )
         else:
             print_error("Invalid task number.")
     except ValueError:
         print_error("Invalid input. Please enter a valid task number.")
 
-
-# Add a new function to view task details
 def view_task_details(tasks):
     list_tasks(tasks, reverse=True)
     try:
@@ -344,6 +339,11 @@ def view_task_details(tasks):
             print(f"Due Date: {task['date']}")
             print(f"Planned Duration: {task['duration']} minutes")
             print(f"Status: {'Completed' if task['completed'] else 'Incomplete'}")
+
+             # Display completed_at if available
+            if task.get("completed_at"):
+                print(f"Completed At: {task['completed_at']}")
+
             print(f"Notes: {task.get('notes', '')}")
         else:
             print_error("Invalid task number.")
