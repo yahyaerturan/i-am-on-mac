@@ -1,10 +1,10 @@
 import os
 import json
+import readline
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
 from colorama import Fore, Style, init
 from prettytable import PrettyTable, FRAME, ALL
-
 
 # Initialize colorama
 init(autoreset=True)
@@ -12,30 +12,23 @@ init(autoreset=True)
 # Constants
 DATA_FILE = os.path.expanduser("~/.day_planner.json")
 
-
 def print_title(title, end=""):
     print(f"{Fore.LIGHTYELLOW_EX}{Style.BRIGHT}{title}{Style.RESET_ALL}", end)
-
 
 def print_error(message, end=""):
     print(f"{Fore.LIGHTRED_EX}{Style.BRIGHT}{message}{Style.RESET_ALL}", end)
 
-
 def print_success(message, end=""):
     print(f"{Fore.LIGHTGREEN_EX}{Style.BRIGHT}{message}{Style.RESET_ALL}", end)
-
 
 def print_warning(message, end=""):
     print(f"{Fore.YELLOW}{Style.BRIGHT}{message}{Style.RESET_ALL}", end)
 
-
 def print_info(message, end=""):
     print(f"{Fore.LIGHTCYAN_EX}{Style.NORMAL}{message}{Style.RESET_ALL}", end)
 
-
 def print_primary(message, end=""):
     print(f"{Fore.YELLOW}{Style.NORMAL}{message}{Style.RESET_ALL}", end)
-
 
 def print_prompt_and_warning(prompt, message, end=""):
     print(
@@ -49,7 +42,7 @@ def load_tasks():
         with open(DATA_FILE, "r") as file:
             return json.load(file)
     else:
-        return {"tasks": []}
+        return {"tasks": [], "last_id": 0}
 
 def load_routine():
     routine_file = os.path.expanduser("~/.day_planner_routine.json")
@@ -62,6 +55,9 @@ def load_routine():
 def save_tasks(tasks):
     with open(DATA_FILE, "w") as file:
         json.dump(tasks, file, indent=2)
+
+def get_next_id(tasks):
+    return tasks["last_id"] + 1
 
 def get_date_input(prompt, is_editing=False):
     while True:
@@ -90,7 +86,7 @@ def get_date_input(prompt, is_editing=False):
             print("  6. in {?} weeks (e.g., 'in 2 weeks')")
             print("  7. next month")
             print("  8. in {?} months (e.g., 'in 2 months')")
-            print("  9. other")
+            print("  9. Custom")
 
             sub_choice = input("Enter your choice: ")
 
@@ -168,35 +164,53 @@ def get_duration_input(prompt, is_editing=False):
 
             # Show options
             print_title("Duration Input Options:")
-            print("  1. 15 minutes")
-            print("  2. 30 minutes")
-            print("  3. 45 minutes")
-            print("  4. 1 hour")
-            print("  5. 2 hours")
-            print("  6. 3 hours")
-            print("  7. other")
+            print("  1. 5 minutes")
+            print("  2. 10 minutes")
+            print("  3. 15 minutes")
+            print("  4. 30 minutes")
+            print("  5. 45 minutes")
+            print("  6. 1 hour")
+            print("  7. 2 hours")
+            print("  8. 3 hours")
+            print("  9. Custom")
 
             sub_choice = input("Enter your choice: ")
 
             if sub_choice == "1":
-                return 15
+                return 5
             elif sub_choice == "2":
-                return 30
+                return 10
             elif sub_choice == "3":
-                return 45
+                return 15
             elif sub_choice == "4":
-                return 60
+                return 30
             elif sub_choice == "5":
-                return 120
+                return 45
             elif sub_choice == "6":
-                return 180
+                return 60
             elif sub_choice == "7":
+                return 120
+            elif sub_choice == "8":
+                return 180
+            elif sub_choice == "9":
                 duration = int(input("\nEnter the duration in minutes: "))
                 return duration
             else:
                 print_error("Invalid choice. Please enter a number between 1 and 7.")
         except ValueError:
             print_error("Invalid input. Please try again.")
+
+def get_task_by_id(tasks, task_id):
+    for task in tasks["tasks"]:
+        if task["id"] == task_id:
+            return task
+    return None
+
+def find_task_index_by_id(tasks, task_id):
+    for index, task in enumerate(tasks["tasks"]):
+        if task["id"] == task_id:
+            return index
+    return -1
 
 def list_tasks(tasks, completed=None, reverse=False):
     sorted_tasks = sorted(
@@ -206,7 +220,7 @@ def list_tasks(tasks, completed=None, reverse=False):
     )
 
     table = PrettyTable()
-    table.field_names = ["#", "Title", "Due Date", "Duration", "Status"]
+    table.field_names = ["Id", "Title", "Due Date", "Duration", "Status"]
     table.hrules = ALL
     table.align["Title"] = "l"  # Align the "Title" column to the left
 
@@ -227,7 +241,7 @@ def list_tasks(tasks, completed=None, reverse=False):
 
             table.add_row(
                 [
-                    idx + 1,
+                    task["id"],
                     title_notes,
                     due_date,
                     f"{task['duration']} minutes",
@@ -247,7 +261,7 @@ def add_task(tasks):
     while date is None:
         date = get_date_input("Due date cannot be empty. " + date_prompt)
 
-    duration_prompt = "Planned duration (15, 30, 45, 60, 120, 180 minutes, or 'other' for custom duration): "
+    duration_prompt = "Planned duration (5, 10, 15, 30, 45, 60, 120, 180 minutes, or 'Custom' for custom duration): "
     duration = get_duration_input(duration_prompt)
 
     while duration is None:
@@ -256,6 +270,7 @@ def add_task(tasks):
     notes = input("Task notes (additional information): ")
 
     new_task = {
+        "id": get_next_id(tasks),
         "title": title,
         "date": str(date),
         "duration": duration,
@@ -264,14 +279,17 @@ def add_task(tasks):
         "completed_at": None,
     }
     tasks["tasks"].append(new_task)
+    tasks["last_id"] += 1
     save_tasks(tasks)
-    print_success(f"\nTask added successfully.")
+    print_success(f"\nTask '{title}' added successfully.")
 
 def edit_task(tasks):
     list_tasks(tasks, False, True)
     try:
-        task_index = int(input("\nEnter the task number to edit: ")) - 1
-        if 0 <= task_index < len(tasks["tasks"]):
+        task_id = int(input("\nEnter the task ID to edit: "))
+        task_index = find_task_index_by_id(tasks, task_id)
+
+        if task_index != -1:
             task = tasks["tasks"][task_index]
             print(
                 f"\nEditing task: {task['title']} ({task['date']}, {task['duration']} minutes)"
@@ -298,62 +316,74 @@ def edit_task(tasks):
                 task["notes"] = notes
 
             save_tasks(tasks)
-            print_success(f"\nTask edited successfully.")
+            print_success(f"\nTask '{task['title']}' edited successfully.")
         else:
-            print_error("Invalid task number.")
+            print_error("Task not found.")
     except ValueError:
-        print_error("Invalid input. Please enter a valid task number.")
+        print_error("Invalid input. Please enter a valid task ID.")
 
 def remove_task(tasks):
     list_tasks(tasks, reverse=True)
     try:
-        task_index = int(input("\nEnter the task number to remove: ")) - 1
-        if 0 <= task_index < len(tasks["tasks"]):
+        task_id = int(input("\nEnter the task ID to remove: "))
+        task_index = find_task_index_by_id(tasks, task_id)
+        
+        if task_index != -1:
             removed_task = tasks["tasks"].pop(task_index)
             save_tasks(tasks)
+
+            list_tasks(tasks, reverse=True)
+
             print_success(f"\nTask '{removed_task['title']}' removed successfully.")
         else:
-            print_error("Invalid task number.")
+            print_error("Task not found.")
     except ValueError:
-        print_error("Invalid input. Please enter a valid task number.")
+        print_error("Invalid input. Please enter a valid task ID.")
 
 def mark_task_done(tasks):
     list_tasks(tasks, False, True)
     try:
-        task_index = int(input("\nEnter the task number to mark as done: ")) - 1
-        if 0 <= task_index < len(tasks["tasks"]):
+        task_id = int(input("\nEnter the task ID to mark as done: "))
+        task_index = find_task_index_by_id(tasks, task_id)
+
+        if task_index != -1:
             tasks["tasks"][task_index]["completed"] = True
             tasks["tasks"][task_index]["completed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             save_tasks(tasks)
+
+            list_tasks(tasks, False, True)
+
             print_success(
                 f"\nTask '{tasks['tasks'][task_index]['title']}' marked as done at {tasks['tasks'][task_index]['completed_at']}."
             )
         else:
-            print_error("Invalid task number.")
+            print_error("Task not found.")
     except ValueError:
-        print_error("Invalid input. Please enter a valid task number.")
+        print_error("Invalid input. Please enter a valid task ID.")
 
 def view_task_details(tasks):
     list_tasks(tasks, reverse=True)
     try:
-        task_index = int(input("\nEnter the task number to view details: ")) - 1
-        if 0 <= task_index < len(tasks["tasks"]):
-            task = tasks["tasks"][task_index]
+        task_id = int(input("\nEnter the task ID to view details: "))
+        task = get_task_by_id(tasks, task_id)
+
+        if task:
             print("\nTask Details:")
+            print(f"ID: {task['id']}")
             print(f"Title: {task['title']}")
             print(f"Due Date: {task['date']}")
             print(f"Planned Duration: {task['duration']} minutes")
             print(f"Status: {'Completed' if task['completed'] else 'Incomplete'}")
 
-             # Display completed_at if available
+            # Display completed_at if available
             if task.get("completed_at"):
                 print(f"Completed At: {task['completed_at']}")
 
             print(f"Notes: {task.get('notes', '')}")
         else:
-            print_error("Invalid task number.")
+            print_error("Task not found.")
     except ValueError:
-        print_error("Invalid input. Please enter a valid task number.")
+        print_error("Invalid input. Please enter a valid task ID.")
 
 def add_routine_tasks(tasks, routine):
     date_prompt = "Add routine tasks for today or tomorrow? (today/tomorrow): "
@@ -364,9 +394,9 @@ def add_routine_tasks(tasks, routine):
 
     routine_tasks = routine.get("tasks", [])
 
-    for routine_task in routine_tasks:
-        # Assuming routine tasks are added for the chosen date
+    for idx, routine_task in enumerate(routine_tasks):
         new_task = {
+            "id": get_next_id(tasks) + idx,
             "title": routine_task["title"],
             "date": str(chosen_date),
             "duration": routine_task.get("duration", 30),
@@ -376,7 +406,9 @@ def add_routine_tasks(tasks, routine):
         }
         tasks["tasks"].append(new_task)
 
+    tasks["last_id"] += len(routine_tasks)
     save_tasks(tasks)
+
     print_success(f"\nRoutine tasks added successfully.")
 
 def main():
