@@ -5,7 +5,30 @@ CURRENTDATEONLY=`date +"%b %d, %Y"`
 CURRENTEPOCTIME=`date +"%Y-%m-%d %T"`
 MYPREFDATEDISP=`date +"%b %d, %Y %T"`
  
-echo QUERIED AT: ${MYPREFDATEDISP}
+printf "QUERIED AT: ${MYPREFDATEDISP}"
+
+calculate_date() {
+  period=$1
+  case $period in
+    "Overnight") echo $(date -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Tomorrow Next") echo $(date -v+1d -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "One Week") echo $(date -v+1w -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Two Weeks") echo $(date -v+2w -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "One Month") echo $(date -v+1m -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Two Months") echo $(date -v+2m -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Three Months") echo $(date -v+3m -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Six Months") echo $(date -v+6m -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Nine Months") echo $(date -v+9m -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "One Year") echo $(date -v+1y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Two Years") echo $(date -v+2y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Three Years") echo $(date -v+3y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Four Years") echo $(date -v+4y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Five Years") echo $(date -v+5y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Seven Years") echo $(date -v+7y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    "Ten Years") echo $(date -v+10y -jf "%Y-%m-%d %T" "$CURRENTDATE" +"%a, %b %d, %Y %T") ;;
+    *) echo "N/A" ;;
+  esac
+}
 
 # Fetch the HTML content using curl and store it in temporary files
 curl -s "https://www.fxempire.com/currencies/usd-try/forward-rates" > temp_usd.html
@@ -16,9 +39,9 @@ output_usd=$(cat temp_usd.html | pup 'table' | pup 'tr json{}' | jq -r '.[]? | [
 output_eur=$(cat temp_eur.html | pup 'table' | pup 'tr json{}' | jq -r '.[]? | .children[3].text')
 
 # Print the table header
-printf "|----------------------|-------------|-------------|\n"
-printf "| %-20s | %11s | %11s |\n" "Expiration" "USD Forward" "EUR Forward"
-printf "|----------------------|-------------|-------------|\n"
+printf "|--------------------------------------------|-------------|-------------|\n"
+printf "| %-42s | %11s | %11s |\n" "Expiration" "USD Forward" "EUR Forward"
+printf "|--------------------------------------------|-------------|-------------|\n"
 
 # Print the combined table content
 count=0
@@ -34,11 +57,13 @@ while IFS=$'\t' read -r col1 col2; do
     if [ -z "$col3" ] || [ "$col3" == "null" ]; then
         col3="N/A"
     fi
-    printf "| %-20s | %11s | %11s |\n" "$col1" "$col2" "$col3"
+
+    col1AsDate=$(calculate_date "$col1")
+    printf "| %-42s | %11s | %11s |\n" "$col1AsDate  $col1" "$col2" "$col3"
     count=$((count+1))
 done <<< "$output_usd"
 
-printf "|----------------------|-------------|-------------|\n\n"
+printf "|--------------------------------------------|-------------|-------------|\n\n"
 
 printf "Source:\n"
 printf "https://www.fxempire.com/currencies/usd-try/forward-rates\n"
