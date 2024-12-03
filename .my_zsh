@@ -116,5 +116,5 @@ alias planner='python3 "$HOME/Code/misc/i-am-on-mac/apps/day_planner/day_planner
 
 
 ### PHP Version
-export PATH="/opt/homebrew/opt/php@8.1/bin:$PATH"
-export PATH="/opt/homebrew/opt/php@8.1/sbin:$PATH"
+export PATH="/opt/homebrew/opt/php@8.2/bin:$PATH"
+export PATH="/opt/homebrew/opt/php@8.2/sbin:$PATH"

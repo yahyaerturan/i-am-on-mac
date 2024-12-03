@@ -253,6 +253,7 @@ def list_tasks(tasks, completed=None, reverse=False):
     print(table)
 
 def add_task(tasks):
+    print_title("\nAdding a new task:")
     title = input("Task title: ")
 
     date_prompt = "Due date (YYYY-MM-DD, 'today', 'tomorrow', 'in x days', 'next week', 'in x weeks', 'next month', or 'in x months'): "
@@ -419,37 +420,37 @@ def main():
     try:
         while True:
             print_title("\nOptions:")
-            print_info("1. Add Task")
-            print_info("2. Edit Task")
-            print_info("3. Remove Task")
-            print_info("4. List Tasks (Newest to Oldest)")
-            print_info("5. List Completed Tasks (Newest to Oldest)")
-            print_info("6. Mark Task as Done")
-            print_info("7. View Task Details")
-            print_info("8. Add Daily Routine Tasks")
-            print_info("9. Quit")
+            print_info("1 [a]  Add Task ")
+            print_info("2 [e]  Edit Task ")
+            print_info("3 [v]  View Task Details ")
+            print_info("4 [d]  Mark Task as Done ")
+            print_info("5 [l]  List Tasks")
+            print_info("6 [c]  List Completed Tasks")
+            print_info("7 [r]  Remove Task ")
+            print_info("8      Add Daily Routine Tasks")
+            print_info("9 [q]  Quit ")
             
 
             choice = input("Enter your choice: ")
 
-            if choice == "1":
+            if choice == "1" or choice.lower() == "a":
                 add_task(tasks)
-            elif choice == "2":
+            elif choice == "2" or choice.lower() == "e":
                 edit_task(tasks)
-            elif choice == "3":
-                remove_task(tasks)
-            elif choice == "4":
-                list_tasks(tasks, completed=False, reverse=True)
-            elif choice == "5":
-                list_tasks(tasks, completed=True, reverse=True)
-            elif choice == "6":
-                mark_task_done(tasks)
-            elif choice == "7":
+            elif choice == "3" or choice.lower() == "v":
                 view_task_details(tasks)
+            elif choice == "4" or choice.lower() == "d" or choice.lower() == "m":
+                mark_task_done(tasks)
+            elif choice == "5" or choice.lower() == "l":
+                list_tasks(tasks, completed=False, reverse=True)
+            elif choice == "6" or choice.lower() == "c":
+                list_tasks(tasks, completed=True, reverse=True)
+            elif choice == "7" or choice.lower() == "r":
+                remove_task(tasks)
             elif choice == "8":
                 routine = load_routine()
                 add_routine_tasks(tasks, routine)
-            elif choice == "9":
+            elif choice == "9" or choice.lower() == "q" or choice.lower() == "x":
                 print_info("Exiting the day planner app.")
                 break
             else:
